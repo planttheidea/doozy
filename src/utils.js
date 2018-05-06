@@ -39,26 +39,27 @@ export const reduceArray = (collection, fn, initialValue) => {
  * @function getPairs
  *
  * @description
- * get the pairs of the value passed
+ * get the pairs of the collection passed
  *
- * @param {Map|Object|Set} value the value to get the pairs of
- * @returns {Array<Array>} the pairs of the value
+ * @param {Map|Object|Set} collection the collection to get the pairs of
+ * @param {boolean} [isValuesOnly] is the collection a set
+ * @returns {Array<Array>} the pairs of the collection
  */
-export const getPairs = (value) => {
-  if (isIterable(value)) {
+export const getPairs = (collection, isValuesOnly) => {
+  if (isIterable(collection)) {
     const pairs = [];
 
-    value.forEach((value, key) => {
-      pairs.push([key, value]);
+    collection.forEach((value, key) => {
+      pairs.push(isValuesOnly ? value : [key, value]);
     });
 
     return pairs;
   }
 
   return reduceArray(
-    Object.keys(value),
+    Object.keys(collection),
     (pairs, key) => {
-      pairs.push([key, value[key]]);
+      pairs.push(isValuesOnly ? collection[key] : [key, collection[key]]);
 
       return pairs;
     },
@@ -301,7 +302,7 @@ export const sortIterable = (collection, fn) =>
   new collection.constructor(
     typeof collection.set === 'function'
       ? getPairsSortedByValue(getPairs(collection), fn)
-      : getPairsSortedByValue(getPairs(collection), fn).map((pair) => pair[0])
+      : sortArray(getPairs(collection, true), fn)
   );
 
 /**

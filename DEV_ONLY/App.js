@@ -12,9 +12,9 @@ setTimeout(() => {
 
   const transform = transduce([
     map((value) => value * value),
-    take(5),
-    filter((value) => value > 0 && value < 20),
-    sort((a, b) => a < b)
+    take(10),
+    filter((value) => value > 10 && value < 500),
+    sort((a, b) => (a < b ? 1 : -1))
   ]);
 
   const array = new Array(size).fill(1).map((ignored, index) => index);
