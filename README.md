@@ -54,13 +54,12 @@ import { filter, map, sort, take, tranduce } from "doozy";
 const fns = [
   map(value => value * value),
   filter(value => value > 10 && value < 500),
-  take(2),
-  sort((a, b) => (a < b ? 1 : -1))
+  filter((value, key, collection) => collection.length < 2
 ];
 const collection = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-console.log(transduce(fns, collection)); // [25, 16]
-console.log(transduce(fns)(collection)); // [25, 16]
+console.log(transduce(fns, collection)); // [16, 25]
+console.log(transduce(fns)(collection)); // [16, 25]
 ```
 
 There are two additional parameters that can be passed, `initialValue` and `passHandler`.
@@ -104,7 +103,7 @@ console.log(transform([1, 2, 3, 4, 5])); // [1, 4, 9, 16, 25]
 combine(fns: Array<function>) => function
 ```
 
-Build a transformer from multiple previous transformers. This is useful when you have a specific combination of transformations that you want to use with a variety of transducers.
+Build a transformer from multiple other transformers. This is useful when you have a specific combination of transformations that you want to use with a variety of transducers.
 
 ```javascript
 const isValidNumber = combine([
