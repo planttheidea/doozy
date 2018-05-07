@@ -5,14 +5,14 @@ import {toWords} from 'number-to-words';
 import {filter, map, sort, take, transduce} from '../src';
 import {getPairs} from '../src/utils';
 
-const size = 1000000;
+const size = 100000;
 
 setTimeout(() => {
   console.log(`Creating dummy data that is ${size.toLocaleString()} items in size, please wait...`);
 
   const transform = transduce([
     map((value) => value * value),
-    take(10),
+    take(2),
     filter((value) => value > 10 && value < 500),
     sort((a, b) => (a < b ? 1 : -1))
   ]);

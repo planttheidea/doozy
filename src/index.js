@@ -1,6 +1,7 @@
 // utils
 import {
   combineHandlers,
+  defaultSortHandler,
   getInitialValue,
   getReduce,
   getSize,
@@ -40,10 +41,10 @@ export const map = (fn) => (reducing) => (collection, value, key) => reducing(co
  * @description
  * sort the vales in the collection
  *
- * @param {function} fn fn the function to sort
+ * @param {function} [fn = defaultSortHandler] fn the function to sort
  * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): (Array|Object)}
  */
-export const sort = (fn) => (reducing) => (collection, value, key) =>
+export const sort = (fn = defaultSortHandler) => (reducing) => (collection, value, key) =>
   Array.isArray(collection)
     ? sortArray(reducing(collection, value, key), fn)
     : isIterable(collection)

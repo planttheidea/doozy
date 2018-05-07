@@ -1,4 +1,16 @@
 /**
+ * @function defaultSortHandler
+ *
+ * @description
+ * the default sort handler if a custom one is not passed
+ *
+ * @param {any} a the first item to compare
+ * @param {any} b te second item to compare
+ * @returns {number} the comparison between a and b
+ */
+export const defaultSortHandler = (a, b) => `${a}`.localeCompare(`${b}`);
+
+/**
  * @function isIterable
  *
  * @description
@@ -226,18 +238,10 @@ export const setHandler = (collection, value, key) => {
  *
  * @param {any} [value] the value passed as initialValue
  * @param {any} collection the collection passed
- * @param {boolean} isCollectionArray is the main collection an array
- * @param {boolean} isCollectionIterable is the main collection an iterable
  * @returns {Array|Object} the initial value
  */
-export const getInitialValue = (value, collection, isCollectionArray, isCollectionIterable) =>
-  typeof value !== 'undefined'
-    ? value
-    : isCollectionArray
-      ? []
-      : isCollectionIterable
-        ? new collection.constructor()
-        : {};
+export const getInitialValue = (value, collection) =>
+  typeof value !== 'undefined' ? value : new collection.constructor();
 
 /**
  * @function getSize
@@ -262,16 +266,16 @@ export const getSize = (collection) =>
  * get the handler for transformations
  *
  * @param {function} handler the custom handler passed
- * @param {any} value the initialValue of the collection
+ * @param {any} initialValue the initialValue of the collection
  * @returns {function} the handler for transformations
  */
-export const getTransformHandler = (handler, value) =>
+export const getTransformHandler = (handler, initialValue) =>
   typeof handler === 'function'
     ? handler
-    : Array.isArray(value)
+    : Array.isArray(initialValue)
       ? pushHandler
-      : isIterable(value)
-        ? typeof value.set === 'function'
+      : isIterable(initialValue)
+        ? typeof initialValue.set === 'function'
           ? setHandler
           : addHandler
         : assignHandler;
@@ -283,7 +287,7 @@ export const getTransformHandler = (handler, value) =>
  * sort the array collection passed based on fn
  *
  * @param {Array} collection the collection array to sort
- * @param {function} fn the method to sort by
+ * @param {function} [fn] the method to sort by
  * @returns {Array} a new, sorted collection array
  */
 export const sortArray = (collection, fn) => collection.sort(fn) && collection;
@@ -295,7 +299,7 @@ export const sortArray = (collection, fn) => collection.sort(fn) && collection;
  * sort the iterable collection passed based on fn
  *
  * @param {Map|Set} collection the collection iterable to sort
- * @param {function} fn the method to sort by
+ * @param {function} [fn] the method to sort by
  * @returns {Map|Set} a new, sorted collection iterable
  */
 export const sortIterable = (collection, fn) =>
@@ -312,7 +316,7 @@ export const sortIterable = (collection, fn) =>
  * sort the object collection passed based on fn
  *
  * @param {Object} collection the collection object to sort
- * @param {function} fn the method to sort by
+ * @param {function} [fn] the method to sort by
  * @returns {Object} a new, sorted collection object
  */
 export const sortObject = (collection, fn) =>

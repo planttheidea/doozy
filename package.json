@@ -3,25 +3,12 @@
   "ava": {
     "babel": "inherit",
     "failFast": true,
-    "files": [
-      "test/*.js"
-    ],
-    "require": [
-      "babel-register"
-    ],
-    "source": [
-      "src/*.js"
-    ],
+    "files": ["test/*.js"],
+    "require": ["babel-register"],
+    "source": ["src/*.js"],
     "verbose": true
   },
-  "browserslist": [
-    "defaults",
-    "Explorer >= 9",
-    "Safari >= 6",
-    "Opera >= 15",
-    "iOS >= 8",
-    "Android >= 4"
-  ],
+  "browserslist": ["defaults", "Explorer >= 9", "Safari >= 6", "Opera >= 15", "iOS >= 8", "Android >= 4"],
   "bugs": {
     "url": "https://github.com/planttheidea/doozy/issues"
   },
@@ -53,11 +40,7 @@
     "webpack-cli": "^2.1.2",
     "webpack-dev-server": "^3.1.4"
   },
-  "keywords": [
-    "transducer",
-    "transduce",
-    "functional"
-  ],
+  "keywords": ["transducer", "transduce", "functional"],
   "license": "MIT",
   "homepage": "https://github.com/planttheidea/doozy#readme",
   "main": "lib/index.js",
@@ -68,7 +51,6 @@
     "url": "git+https://github.com/planttheidea/doozy.git"
   },
   "scripts": {
-    "benchmark": "npm run transpile:lib && NODE_ENV=production node ./benchmarks/index.js",
     "build": "NODE_ENV=production rollup -c",
     "clean": "npm run clean:lib && npm run clean:es && npm run clean:dist",
     "clean:dist": "rimraf dist",
@@ -79,7 +61,8 @@
     "lint": "NODE_ENV=test eslint src",
     "lint:fix": "NODE_ENV=test eslint src --fix",
     "prepublish": "if in-publish; then npm run prepublish:compile; fi",
-    "prepublish:compile": "npm run lint && npm run test:coverage && npm run transpile:lib && npm run transpile:es && npm run dist",
+    "prepublish:compile":
+      "npm run lint && npm run test:coverage && npm run transpile:lib && npm run transpile:es && npm run dist",
     "start": "npm run dev",
     "test": "NODE_PATH=. NODE_ENV=production BABEL_ENV=test ava",
     "test:coverage": "nyc npm test",
