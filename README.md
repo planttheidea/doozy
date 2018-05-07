@@ -18,7 +18,7 @@ Transducer library for arrays, objects, sets, and maps
 
 Transducers are a great way to write efficient, declarative data transformations that only perform operations as needed. [Several great articles have been written on the topic](https://medium.com/@roman01la/understanding-transducers-in-javascript-3500d3bd9624), but applying them can be daunting for the most common object type (`Array`), let alone various object types.
 
-`doozy` is a tiny library (~860 bytes minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
+`doozy` is a tiny library (~870 bytes minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
 
 ## Usage
 
@@ -39,14 +39,16 @@ console.log(transformed); // [3, 9, 16]
 
 ```javascript
 transduce(
-  fns: (Array<function>,
+  fns: (Array<function>|function),
   collection: (Array<any>|Map|Object|Set),
   [initialValue: any],
   [passHandler: function]
 ) => (Array<any>|Map|Object|Set)
 ```
 
-The method that builds and executes the transduction, transforming the data based on the order of the transformers. Can be executed in a single call (passing both `fns` and `collection`) or curried (passing only `fns` initially, and then `collection` later).
+The method that builds and executes the transduction, transforming the data based on the order of the transformers. Accepts either a transformer function or an `Array` of transformer functions that will be applied in order of declaration.
+
+`transduce` can be executed in a single call (passing both `fns` and `collection`) or curried (passing only `fns` initially, and then `collection` later).
 
 ```javascript
 import { filter, map, sort, take, tranduce } from "doozy";

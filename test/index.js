@@ -111,6 +111,45 @@ test('if transduce will return the result if more than the fns are passed', (t) 
   t.deepEqual(result, ['oof']);
 });
 
+test('if transduce will handle a single transformation correctly', (t) => {
+  const transform = index.transduce(index.filter((value) => value % 2 === 0));
+
+  const size = 5;
+
+  const array = new Array(size).fill(1).map((ignored, index) => index);
+  const object = array.reduce((wordToNumber, value) => {
+    wordToNumber[toWords(value)] = value;
+
+    return wordToNumber;
+  }, {});
+  const set = new Set(array);
+  const mapFromObject = new Map(utils.getPairs(object));
+
+  const arrayResult = transform(array);
+  const objectResult = transform(object);
+  const mapResult = transform(mapFromObject);
+  const setResult = transform(set);
+
+  t.deepEqual(arrayResult, [0, 2, 4]);
+  t.deepEqual(objectResult, {zero: 0, two: 2, four: 4});
+
+  const expectedMapResult = new Map();
+
+  expectedMapResult.set('zero', 0);
+  expectedMapResult.set('two', 2);
+  expectedMapResult.set('four', 4);
+
+  t.deepEqual(mapResult, expectedMapResult);
+
+  const expectedSetResult = new Set();
+
+  expectedSetResult.add(0);
+  expectedSetResult.add(2);
+  expectedSetResult.add(4);
+
+  t.deepEqual(setResult, expectedSetResult);
+});
+
 test('if transduce will handle multiple transformations correctly', (t) => {
   const transform = index.transduce([
     index.map((value) => ({

@@ -33,11 +33,11 @@ export const map = (fn) => (reducing) => (collection, value, key) =>
  * @description
  * convert the methods passed into a transducer for the collection later pssed
  *
- * @param {Array<function>} fns the functions to apply
+ * @param {Array<function>|function} fns the functions to apply
  * @returns {function((Array|Object), [any]): (Array|Object)} the method that will transduce the collection passed
  */
 export const transduce = (fns, ...rest) => {
-  const transform = combineHandlers(fns);
+  const transform = Array.isArray(fns) ? combineHandlers(fns) : fns;
   const transducer = (collection, passedInitialValue, passedHandler) => {
     const isCollectionArray = Array.isArray(collection);
     const isCollectionIterable = !isCollectionArray && isIterable(collection);
