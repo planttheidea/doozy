@@ -2,24 +2,47 @@
 import {toWords} from 'number-to-words';
 
 // src
-import {filter, map, sort, take, transduce} from '../src';
+import {combine, filter, map, transduce} from '../src';
 import {getPairs} from '../src/utils';
 
 const size = 100000;
+
+const isEvenSquareRoot = combine([
+  map((value) => ({
+    squareRoot: Math.sqrt(value),
+    value
+  })),
+  filter((value) => ~~value.squareRoot === value.squareRoot),
+  filter((value) => value.squareRoot % 2 === 0),
+  map(({value}) => value)
+]);
+
+console.log('even square roots', transduce([isEvenSquareRoot], new Array(size).fill(1).map((ignored, index) => index)));
+
+const getSize = (collection) =>
+  typeof collection.length === 'number'
+    ? collection.length
+    : typeof collection.size === 'number'
+      ? collection.size
+      : Object.keys(collection).length;
+
+const isValidNumber = combine([map((value) => +value), filter((value) => !isNaN(value))]);
 
 setTimeout(() => {
   console.log(`Creating dummy data that is ${size.toLocaleString()} items in size, please wait...`);
 
   const transform = transduce([
+    isValidNumber,
     map((value) => value * value),
-    take(2),
     filter((value) => value > 10 && value < 500),
-    sort((a, b) => (a < b ? 1 : -1))
+    filter((value, key, collection) => getSize(collection) < 5),
+    map((value) => ({original: Math.sqrt(value), value})),
+    map((value) => ({...value, isEven: value.original % 2 === 0}))
   ]);
 
-  const array = new Array(size).fill(1).map((ignored, index) => index);
+  const array = ['foo', 'bar'].concat(new Array(size).fill(1).map((ignored, index) => index));
   const object = array.reduce((wordToNumber, value) => {
-    wordToNumber[toWords(value)] = value;
+    wordToNumber[typeof value === 'string' ? value : toWords(value)] = value;
 
     return wordToNumber;
   }, {});

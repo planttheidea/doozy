@@ -10,13 +10,15 @@ Transducer library for arrays, objects, sets, and maps
 * [Transformers](#transformers)
   * [filter](#filter)
   * [map](#map)
-  * [sort](#sort)
-  * [take](#take)
+  * [combine](#combine)
+  * [Building others](#building-others)
 * [Development](#development)
 
 ## Summary
 
-Transducers are a great way to write efficient, declarative data transformations that only perform operations as needed. [Several great articles have been written on the topic](https://medium.com/@roman01la/understanding-transducers-in-javascript-3500d3bd9624), but applying them can be daunting for the most common object type (`Array`), let alone various object types. `doozy` attemps to streamline this process, allowing for simple creation of transducers that work with multiple object types.
+Transducers are a great way to write efficient, declarative data transformations that only perform operations as needed. [Several great articles have been written on the topic](https://medium.com/@roman01la/understanding-transducers-in-javascript-3500d3bd9624), but applying them can be daunting for the most common object type (`Array`), let alone various object types.
+
+`doozy` is a tiny library (~860 bytes minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
 
 ## Usage
 
@@ -74,7 +76,7 @@ There are two additional parameters that can be passed, `initialValue` and `pass
 filter(fn: function) => (Array<any>|Map|Object|Set)
 ```
 
-Predicate method that receives `(value: any, key: (number|string))`, and will prevent the `value` from being passed to the new collection if returns falsy.
+Predicate method that receives `(value: any, key: (number|string), newCollection: (Array<any>|Map|Object|Set))`, and will prevent the `value` from being passed to the new collection if returns falsy.
 
 ```javascript
 const transform = transduce([filter((value, key) value === 1 || key === 1)]);
@@ -88,7 +90,7 @@ console.log(transform([1, 2, 3, 4, 5])); // [1, 2]
 map(fn: function) => (Array<any>|Map|Object|Set)
 ```
 
-Method that receives `(value: any, key: (number|string))`, and will assign the value returned to the new collection at `key`.
+Method that receives `(value: any, key: (number|string), newCollection: (Array<any>|Map|Object|Set))`, and will assign the value returned to the new collection at `key`.
 
 ```javascript
 const transform = transduce([map(value => value * value)]);
@@ -96,34 +98,54 @@ const transform = transduce([map(value => value * value)]);
 console.log(transform([1, 2, 3, 4, 5])); // [1, 4, 9, 16, 25]
 ```
 
-#### sort
+#### combine
 
 ```javascript
-sort(fn: function) => (Array<any>|Map|Object|Set)
+combine(fns: Array<function>) => function
 ```
 
-Method that receives `(valueA: any, valueB: any)`, and will sort the values based on the number returned (expects `-1`, `0`, or `1`).
+Build a transformer from multiple previous transformers. This is useful when you have a specific combination of transformations that you want to use with a variety of transducers.
 
 ```javascript
-const transform = transduce([sort((a, b) => (a < b ? 1 : -1))]);
-
-console.log(transform([1, 2, 3, 4, 5])); // [5, 4, 3, 2, 1]
+const isValidNumber = combine([
+  map((value) => +value),
+  filter((value) => !isNaN(value))
+]);
+...
+const otherTransform = transduce([
+  isValidNumber,
+  filter((value) => value < 100)
+]);
 ```
 
-**NOTE**: This is a mutative operation on `Array` objects for performance reasons.
+#### Building others
 
-#### take
-
-```javascript
-sort(size: number) => (Array<any>|Map|Object|Set)
-```
-
-Limit the number of items returned to the `size` passed.
+With `filter`, `map`, and `combine`, you can build a large collection of utilities that use them under the hood to achieve specific application requirements.
 
 ```javascript
-const crazyBigArray = new Array(1000000).fill(1).map((ignored, index) => index);
+// unique values in array
+const unique = filter((value, key, collection) => !~collection.indexOf(value));
 
-console.log(transduce([take(5)], crazyBigArray)); // [0, 1, 2, 3, 4]
+// formatted number string
+const formattedNumber = map(value => value.toLocaleString());
+
+// greater than or equal to
+const gte = comparator => filter(value => value >= comparator);
+
+// numbers that have even square roots
+const isEvenSquareRoot = combine([
+  // get the square roots
+  map(value => ({
+    squareRoot: Math.sqrt(value),
+    value
+  })),
+  // make sure the square roots are whole numbers
+  filter(value => ~~value.squareRoot === value.squareRoot),
+  // make sure the square roots are even
+  filter(value => value.squareRoot % 2 === 0),
+  // return to the original value
+  map(({ value }) => value)
+]);
 ```
 
 ## Development

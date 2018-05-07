@@ -121,14 +121,6 @@ test('if getPairs will get the iterable values for an object', (t) => {
   t.deepEqual(result, ['bar', 'baz']);
 });
 
-test('if getPairsSortedByValue will get the pairs sorted by value', (t) => {
-  const pairs = [[0, 'foo'], [1, 'bar'], [2, 'baz'], [3, 'quz']];
-
-  const result = utils.getPairsSortedByValue(pairs, utils.defaultSortHandler);
-
-  t.deepEqual(result, [[1, 'bar'], [2, 'baz'], [0, 'foo'], [3, 'quz']]);
-});
-
 test('if reduceIterable will reduce the iterable correctly with an initialValue', (t) => {
   const set = new Set([1, 2, 3, 4, 5]);
   const fn = (total, number) => total + number;
@@ -305,30 +297,6 @@ test('if getInitialValue will return a new object if value is undefined and the 
   t.deepEqual(result, {});
 });
 
-test('if getSize will get the size of the collection when it is an array', (t) => {
-  const collection = ['foo', 'bar', 'baz'];
-
-  const result = utils.getSize(collection);
-
-  t.is(result, collection.length);
-});
-
-test('if getSize will get the size of the collection when it is an iterable', (t) => {
-  const collection = new Set(['foo', 'bar', 'baz']);
-
-  const result = utils.getSize(collection);
-
-  t.is(result, collection.size);
-});
-
-test('if getSize will get the size of the collection when it is an object', (t) => {
-  const collection = {foo: 'foo', bar: 'bar', baz: 'baz'};
-
-  const result = utils.getSize(collection);
-
-  t.is(result, Object.keys(collection).length);
-});
-
 test('if getTransformHandler will return the handler if it is a function', (t) => {
   const handler = () => {};
   const initialValue = [];
@@ -372,136 +340,4 @@ test('if getTransformHandler will return the addHandler if the initialValue is a
   const result = utils.getTransformHandler(handler, initialValue);
 
   t.is(result, utils.assignHandler);
-});
-
-test('if sortArray will sort the array and return it based on the default sort method', (t) => {
-  const collection = [10, 2, 1, 20];
-  const fn = utils.defaultSortHandler;
-
-  const result = utils.sortArray(collection, fn);
-
-  t.is(result, collection);
-  t.deepEqual(result, [1, 10, 2, 20]);
-});
-
-test('if sortArray will sort the array and return it based on a custom sort method', (t) => {
-  const collection = [10, 2, 1, 20];
-  const fn = (a, b) => a - b;
-
-  const result = utils.sortArray(collection, fn);
-
-  t.is(result, collection);
-  t.deepEqual(result, [1, 2, 10, 20]);
-});
-
-test('if sortIterable will sort the map and return it based on the default sort method', (t) => {
-  const collection = new Map();
-  const fn = utils.defaultSortHandler;
-
-  collection.set(0, 10);
-  collection.set(1, 2);
-  collection.set(2, 1);
-  collection.set(3, 20);
-
-  const result = utils.sortIterable(collection, fn);
-
-  t.not(result, collection);
-
-  const expectedResult = new Map();
-
-  expectedResult.set(2, 1);
-  expectedResult.set(0, 10);
-  expectedResult.set(1, 2);
-  expectedResult.set(3, 20);
-
-  t.deepEqual(result, expectedResult);
-});
-
-test('if sortIterable will sort the map and return it based on a custom sort method', (t) => {
-  const collection = new Map();
-  const fn = (a, b) => a - b;
-
-  collection.set(0, 10);
-  collection.set(1, 2);
-  collection.set(2, 1);
-  collection.set(3, 20);
-
-  const result = utils.sortIterable(collection, fn);
-
-  t.not(result, collection);
-
-  const expectedResult = new Map();
-
-  expectedResult.set(2, 1);
-  expectedResult.set(1, 2);
-  expectedResult.set(0, 10);
-  expectedResult.set(3, 20);
-
-  t.deepEqual(result, expectedResult);
-});
-
-test('if sortIterable will sort the set and return it based on the default sort method', (t) => {
-  const collection = new Set();
-  const fn = utils.defaultSortHandler;
-
-  collection.add(10);
-  collection.add(2);
-  collection.add(1);
-  collection.add(20);
-
-  const result = utils.sortIterable(collection, fn);
-
-  t.not(result, collection);
-
-  const expectedResult = new Set();
-
-  expectedResult.add(1);
-  expectedResult.add(10);
-  expectedResult.add(2);
-  expectedResult.add(20);
-
-  t.deepEqual(result, expectedResult);
-});
-
-test('if sortIterable will sort the set and return it based on a custom sort method', (t) => {
-  const collection = new Set();
-  const fn = (a, b) => a - b;
-
-  collection.add(10);
-  collection.add(2);
-  collection.add(1);
-  collection.add(20);
-
-  const result = utils.sortIterable(collection, fn);
-
-  t.not(result, collection);
-
-  const expectedResult = new Set();
-
-  expectedResult.add(1);
-  expectedResult.add(2);
-  expectedResult.add(10);
-  expectedResult.add(20);
-
-  t.deepEqual(result, expectedResult);
-});
-
-test('if sortObject will sort the object and return it based on the default sort method', (t) => {
-  const collection = {0: 10, 1: 2, 2: 1, 3: 20};
-  const fn = utils.defaultSortHandler;
-
-  const result = utils.sortObject(collection, fn);
-
-  t.not(result, collection);
-  t.deepEqual(result, {2: 1, 0: 10, 1: 2, 3: 20});
-});
-
-test('if sortObject will sort the object and return it based on a custom sort method', (t) => {
-  const collection = {0: 10, 1: 2, 2: 1, 3: 20};
-  const fn = (a, b) => a - b;
-
-  const result = utils.sortObject(collection, fn);
-
-  t.not(result, collection);
-  t.deepEqual(result, {2: 1, 1: 2, 0: 10, 3: 20});
 });

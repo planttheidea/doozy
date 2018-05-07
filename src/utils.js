@@ -1,16 +1,4 @@
 /**
- * @function defaultSortHandler
- *
- * @description
- * the default sort handler if a custom one is not passed
- *
- * @param {any} a the first item to compare
- * @param {any} b te second item to compare
- * @returns {number} the comparison between a and b
- */
-export const defaultSortHandler = (a, b) => `${a}`.localeCompare(`${b}`);
-
-/**
  * @function isIterable
  *
  * @description
@@ -78,18 +66,6 @@ export const getPairs = (collection, isValuesOnly) => {
     []
   );
 };
-
-/**
- * @function getPairsSortedByValue
- *
- * @description
- * get the pairs of the value passed sorted by the value
- *
- * @param {Array<Array>} pairs the pairs to sort
- * @param {function} fn the sort method
- * @returns {Array<Array>} the entries of the value
- */
-export const getPairsSortedByValue = (pairs, fn) => pairs.sort((a, b) => fn(a[1], b[1])) && pairs;
 
 /**
  * @function reduceIterable
@@ -244,22 +220,6 @@ export const getInitialValue = (value, collection) =>
   typeof value !== 'undefined' ? value : new collection.constructor();
 
 /**
- * @function getSize
- *
- * @description
- * get the size of the collection
- *
- * @param {Array|Object} collection the collection to get the size of
- * @returns {number} the size of the collection
- */
-export const getSize = (collection) =>
-  Array.isArray(collection)
-    ? collection.length
-    : isIterable(collection)
-      ? collection.size
-      : Object.keys(collection).length;
-
-/**
  * @function getTransformHandler
  *
  * @description
@@ -279,53 +239,3 @@ export const getTransformHandler = (handler, initialValue) =>
           ? setHandler
           : addHandler
         : assignHandler;
-
-/**
- * @function sortArray
- *
- * @description
- * sort the array collection passed based on fn
- *
- * @param {Array} collection the collection array to sort
- * @param {function} [fn] the method to sort by
- * @returns {Array} a new, sorted collection array
- */
-export const sortArray = (collection, fn) => collection.sort(fn) && collection;
-
-/**
- * @function sortIterable
- *
- * @description
- * sort the iterable collection passed based on fn
- *
- * @param {Map|Set} collection the collection iterable to sort
- * @param {function} [fn] the method to sort by
- * @returns {Map|Set} a new, sorted collection iterable
- */
-export const sortIterable = (collection, fn) =>
-  new collection.constructor(
-    typeof collection.set === 'function'
-      ? getPairsSortedByValue(getPairs(collection), fn)
-      : sortArray(getPairs(collection, true), fn)
-  );
-
-/**
- * @function sortObject
- *
- * @description
- * sort the object collection passed based on fn
- *
- * @param {Object} collection the collection object to sort
- * @param {function} [fn] the method to sort by
- * @returns {Object} a new, sorted collection object
- */
-export const sortObject = (collection, fn) =>
-  reduceArray(
-    getPairsSortedByValue(getPairs(collection), fn),
-    (object, value) => {
-      object[value[0]] = value[1];
-
-      return object;
-    },
-    {}
-  );

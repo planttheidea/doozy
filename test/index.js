@@ -74,121 +74,6 @@ test('if map will call reducing with the value as the result of fn', (t) => {
   t.true(reducing.calledWith(collection, newValue, key));
 });
 
-test('if sort will call sortArray if the collection is an array', (t) => {
-  const fn = undefined;
-
-  const createReducer = index.sort(fn);
-
-  const reducing = sinon.stub().returnsArg(0);
-
-  const reducer = createReducer(reducing);
-
-  const collection = [];
-  const value = 'value';
-  const key = 'key';
-
-  const stub = sinon.stub(utils, 'sortArray');
-
-  reducer(collection, value, key);
-
-  t.true(reducing.calledOnce);
-  t.true(reducing.calledWith(collection, value, key));
-
-  t.true(stub.calledOnce);
-  t.true(stub.calledWith(collection, utils.defaultSortHandler));
-
-  stub.restore();
-});
-
-test('if sort will call sortIterable if the collection is an iterable', (t) => {
-  const fn = () => {};
-
-  const createReducer = index.sort(fn);
-
-  const reducing = sinon.stub().returnsArg(0);
-
-  const reducer = createReducer(reducing);
-
-  const collection = new Map();
-  const value = 'value';
-  const key = 'key';
-
-  const stub = sinon.stub(utils, 'sortIterable');
-
-  reducer(collection, value, key);
-
-  t.true(reducing.calledOnce);
-  t.true(reducing.calledWith(collection, value, key));
-
-  t.true(stub.calledOnce);
-  t.true(stub.calledWith(collection, fn));
-
-  stub.restore();
-});
-
-test('if sort will call sortObject if the collection is an obnect', (t) => {
-  const fn = () => {};
-
-  const createReducer = index.sort(fn);
-
-  const reducing = sinon.stub().returnsArg(0);
-
-  const reducer = createReducer(reducing);
-
-  const collection = {};
-  const value = 'value';
-  const key = 'key';
-
-  const stub = sinon.stub(utils, 'sortObject');
-
-  reducer(collection, value, key);
-
-  t.true(reducing.calledOnce);
-  t.true(reducing.calledWith(collection, value, key));
-
-  t.true(stub.calledOnce);
-  t.true(stub.calledWith(collection, fn));
-
-  stub.restore();
-});
-
-test('if take will call reducing if the size of the collection is smaller than the size', (t) => {
-  const size = 5;
-
-  const createReducer = index.take(size);
-
-  const reducing = sinon.spy();
-
-  const reducer = createReducer(reducing);
-
-  const collection = [];
-  const value = 'value';
-  const key = 'key';
-
-  reducer(collection, value, key);
-
-  t.true(reducing.calledOnce);
-  t.true(reducing.calledWith(collection, value, key));
-});
-
-test('if take will not call reducing if the size of the collection is not smaller than the size', (t) => {
-  const size = 1;
-
-  const createReducer = index.take(size);
-
-  const reducing = sinon.spy();
-
-  const reducer = createReducer(reducing);
-
-  const collection = ['existing value'];
-  const value = 'value';
-  const key = 'key';
-
-  reducer(collection, value, key);
-
-  t.true(reducing.notCalled);
-});
-
 test('if transduce will return the transducer if only the fns are passed', (t) => {
   const fns = [
     index.map((value) =>
@@ -228,13 +113,17 @@ test('if transduce will return the result if more than the fns are passed', (t) 
 
 test('if transduce will handle multiple transformations correctly', (t) => {
   const transform = index.transduce([
-    index.map((value) => value * value),
-    index.take(2),
-    index.filter((value) => value > 10 && value < 500),
-    index.sort((a, b) => (a < b ? 1 : -1))
+    index.map((value) => ({
+      squareRoot: Math.sqrt(value),
+      value
+    })),
+    index.filter((value) => ~~value.squareRoot === value.squareRoot),
+    index.filter((value) => value.squareRoot % 2 === 0),
+    index.map(({value}) => value),
+    index.filter((value) => value)
   ]);
 
-  const size = 1000;
+  const size = 100;
 
   const array = new Array(size).fill(1).map((ignored, index) => index);
   const object = array.reduce((wordToNumber, value) => {
@@ -250,20 +139,24 @@ test('if transduce will handle multiple transformations correctly', (t) => {
   const mapResult = transform(mapFromObject);
   const setResult = transform(set);
 
-  t.deepEqual(arrayResult, [25, 16]);
-  t.deepEqual(objectResult, {five: 25, four: 16});
+  t.deepEqual(arrayResult, [4, 16, 36, 64]);
+  t.deepEqual(objectResult, {four: 4, sixteen: 16, 'thirty-six': 36, 'sixty-four': 64});
 
   const expectedMapResult = new Map();
 
-  expectedMapResult.set('five', 25);
-  expectedMapResult.set('four', 16);
+  expectedMapResult.set('four', 4);
+  expectedMapResult.set('sixteen', 16);
+  expectedMapResult.set('thirty-six', 36);
+  expectedMapResult.set('sixty-four', 64);
 
   t.deepEqual(mapResult, expectedMapResult);
 
   const expectedSetResult = new Set();
 
-  expectedSetResult.add(25);
+  expectedSetResult.add(4);
   expectedSetResult.add(16);
+  expectedSetResult.add(36);
+  expectedSetResult.add(64);
 
   t.deepEqual(setResult, expectedSetResult);
 });

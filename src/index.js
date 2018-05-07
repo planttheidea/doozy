@@ -1,16 +1,7 @@
 // utils
-import {
-  combineHandlers,
-  defaultSortHandler,
-  getInitialValue,
-  getReduce,
-  getSize,
-  getTransformHandler,
-  isIterable,
-  sortArray,
-  sortIterable,
-  sortObject
-} from './utils';
+import {combineHandlers, getInitialValue, getReduce, getTransformHandler, isIterable} from './utils';
+
+export {combineHandlers as combine};
 
 /**
  * @function filter
@@ -22,7 +13,7 @@ import {
  * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): (Array|Object)}
  */
 export const filter = (fn) => (reducing) => (collection, value, key) =>
-  fn(value, key) ? reducing(collection, value, key) : collection;
+  fn(value, key, collection) ? reducing(collection, value, key) : collection;
 
 /**
  * @function map
@@ -33,35 +24,8 @@ export const filter = (fn) => (reducing) => (collection, value, key) =>
  * @param {function} fn fn the function to map with
  * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): (Array|Object)}
  */
-export const map = (fn) => (reducing) => (collection, value, key) => reducing(collection, fn(value, key), key);
-
-/**
- * @function sort
- *
- * @description
- * sort the vales in the collection
- *
- * @param {function} [fn = defaultSortHandler] fn the function to sort
- * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): (Array|Object)}
- */
-export const sort = (fn = defaultSortHandler) => (reducing) => (collection, value, key) =>
-  Array.isArray(collection)
-    ? sortArray(reducing(collection, value, key), fn)
-    : isIterable(collection)
-      ? sortIterable(reducing(collection, value, key), fn)
-      : sortObject(reducing(collection, value, key), fn);
-
-/**
- * @function take
- *
- * @description
- * only return the first n number of items in the collection
- *
- * @param {number} size the max number of items to return
- * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): (Array|Object)}
- */
-export const take = (size) => (reducing) => (collection, value, key) =>
-  getSize(collection) < size ? reducing(collection, value, key) : collection;
+export const map = (fn) => (reducing) => (collection, value, key) =>
+  reducing(collection, fn(value, key, collection), key);
 
 /**
  * @function transduce
