@@ -7,13 +7,29 @@ export {combineHandlers as combine};
  * @function filter
  *
  * @description
- * ffiler the collection by the fn passed
+ * filter the collection by the fn passed
  *
  * @param {function} fn fn the function to filter by
  * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): (Array|Object)}
  */
 export const filter = (fn) => (reducing) => (collection, value, key) =>
   fn(value, key, collection) ? reducing(collection, value, key) : collection;
+
+/**
+ * @function find
+ *
+ * @description
+ * find the item in the collection by the fn passed
+ *
+ * @param {function} fn fn the function to find the item with
+ * @returns {function(function((Array|Object), any, (number|string)): (Array|Object)): any}
+ */
+export const find = (fn) => (reducing) => {
+  let found = false;
+
+  return (collection, value, key) =>
+    !found && (found = fn(value, key, collection)) ? reducing(collection, value, key) : collection;
+};
 
 /**
  * @function map

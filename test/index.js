@@ -45,9 +45,45 @@ test('if filter will call not reducing if the fn called returns falsy', (t) => {
   reducer(collection, value, key);
 
   t.true(fn.calledOnce);
-  t.true(fn.calledWith(value, key));
+  t.true(fn.calledWith(value, key, collection));
 
   t.true(reducing.notCalled);
+});
+
+test('if find will only call fn until a match is found', (t) => {
+  const fn = sinon
+    .stub()
+    .onFirstCall()
+    .returns(false)
+    .onSecondCall()
+    .returns(false)
+    .onThirdCall()
+    .returns(true);
+
+  const createReducer = index.find(fn);
+
+  const reducing = sinon.spy();
+
+  const reducer = createReducer(reducing);
+
+  const collection = [];
+  const value = 'value';
+  const key = 'key';
+
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+  reducer(collection, value, key);
+
+  t.true(fn.calledThrice);
+  t.deepEqual(fn.args, [[value, key, collection], [value, key, collection], [value, key, collection]]);
+
+  t.true(reducing.calledOnce);
+  t.true(reducing.calledWith(collection, value, key));
 });
 
 test('if map will call reducing with the value as the result of fn', (t) => {
@@ -68,7 +104,7 @@ test('if map will call reducing with the value as the result of fn', (t) => {
   reducer(collection, value, key);
 
   t.true(fn.calledOnce);
-  t.true(fn.calledWith(value, key));
+  t.true(fn.calledWith(value, key, collection));
 
   t.true(reducing.calledOnce);
   t.true(reducing.calledWith(collection, newValue, key));
