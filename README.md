@@ -9,6 +9,7 @@ Transducer library for arrays, objects, sets, and maps
 * [transduce](#transduce)
 * [Transformers](#transformers)
   * [filter](#filter)
+  * [find](#find)
   * [map](#map)
   * [combine](#combine)
   * [Building others](#building-others)
@@ -18,7 +19,7 @@ Transducer library for arrays, objects, sets, and maps
 
 Transducers are a great way to write efficient, declarative data transformations that only perform operations as needed. [Several great articles have been written on the topic](https://medium.com/@roman01la/understanding-transducers-in-javascript-3500d3bd9624), but applying them can be daunting for the most common object type (`Array`), let alone various object types.
 
-`doozy` is a tiny library (~870 bytes minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
+`doozy` is a tiny library (~906 bytes minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
 
 ## Usage
 
@@ -83,6 +84,28 @@ Predicate method that receives `(value: any, key: (number|string), newCollection
 const transform = transduce([filter((value, key) value === 1 || key === 1)]);
 
 console.log(transform([1, 2, 3, 4, 5])); // [1, 2]
+```
+
+#### find
+
+```javascript
+find(fn: function) => any
+```
+
+Predicate method that receives `(value: any, key: (number|string), newCollection: (Array<any>|Map|Object|Set))`, and will prevent the `value` from being passed to the new collection if returns falsy. This differs from [`filter`](#filter) in that only the first match is returned, and `fn` will not execute for the rest of the collection once that match is found.
+
+```javascript
+const transform = transduce([find((value, key) value === 1 || key === 1)]);
+
+console.log(transform([1, 2, 3, 4, 5])); // [1]
+```
+
+**NOTE**: Often you want to find the value itself, not a collection with the value as the only entry. If this is the case, you can pair this call with a `passHandler` method that returns the value directly.
+
+```javascript
+const transform = transduce([find((value, key) value === 1 || key === 1)]);
+
+console.log(transform([1, 2, 3, 4, 5], null, (collectionIgnored, value) => value)); // 1
 ```
 
 #### map

@@ -2,10 +2,22 @@
 import {toWords} from 'number-to-words';
 
 // src
-import {combine, filter, map, transduce} from '../src';
+import {combine, filter, find, map, transduce} from '../src';
 import {getPairs} from '../src/utils';
 
 const size = 100000;
+
+const find123 = find((value) => value === 423);
+
+console.log(
+  'find value',
+  transduce(
+    find123,
+    new Set(new Array(size).fill(1).map((ignored, index) => index)),
+    null,
+    (ignored, value, key) => key
+  )
+);
 
 const isEvenSquareRoot = combine([
   map((value) => ({
