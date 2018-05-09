@@ -57,24 +57,44 @@ test('if isIterable returns true if an iterable', (t) => {
   t.true(result);
 });
 
-test('if reduceArray will reduce the array value correctly with an initialValue', (t) => {
+test('if reduceArray will reduce the array correctly with an initialValue', (t) => {
   const collection = [1, 2, 3, 4, 5];
   const fn = (total, number) => total + number;
   const initialValue = 0;
 
-  const result = utils.reduceArray(collection, fn, initialValue);
+  const result = utils.reduceArray(false)(collection, fn, initialValue);
 
   t.is(result, 15);
 });
 
-test('if reduceArray will reduce the array value correctly with no initialValue', (t) => {
+test('if reduceArray will reduce the array correctly with no initialValue', (t) => {
   const collection = [1, 2, 3, 4, 5];
   const fn = (total, number) => total + number;
   const initialValue = undefined;
 
-  const result = utils.reduceArray(collection, fn, initialValue);
+  const result = utils.reduceArray(false)(collection, fn, initialValue);
 
   t.is(result, 15);
+});
+
+test('if reduceArray will reduce the array correctly with an initialValue when reverse', (t) => {
+  const collection = [1, 2, 3, 4, 5];
+  const fn = (total, number) => total.concat([number]);
+  const initialValue = [];
+
+  const result = utils.reduceArray(true)(collection, fn, initialValue);
+
+  t.deepEqual(result, [5, 4, 3, 2, 1]);
+});
+
+test('if reduceArray will reduce the array correctly with no initialValue when reverse', (t) => {
+  const collection = [1, 2, 3, 4, 5];
+  const fn = (total, number) => (Array.isArray(total) ? total.concat([number]) : [total, number]);
+  const initialValue = undefined;
+
+  const result = utils.reduceArray(true)(collection, fn, initialValue);
+
+  t.deepEqual(result, [5, 4, 3, 2, 1]);
 });
 
 test('if getPairs will get the iterable pairs for a Map', (t) => {
@@ -126,7 +146,7 @@ test('if reduceIterable will reduce the iterable correctly with an initialValue'
   const fn = (total, number) => total + number;
   const initialValue = 0;
 
-  const result = utils.reduceIterable(set, fn, initialValue);
+  const result = utils.reduceIterable(false)(set, fn, initialValue);
 
   t.is(result, 15);
 });
@@ -136,9 +156,41 @@ test('if reduceIterable will reduce the iterable correctly with no initialValue'
   const fn = (total, number) => total + number;
   const initialValue = undefined;
 
-  const result = utils.reduceIterable(set, fn, initialValue);
+  const result = utils.reduceIterable(false)(set, fn, initialValue);
 
   t.is(result, 15);
+});
+
+test('if reduceIterable will reduce the iterable correctly with an initialValue when reverse', (t) => {
+  const set = new Set([1, 2, 3, 4, 5]);
+  const fn = (total, number) => {
+    total.add(number);
+
+    return total;
+  };
+  const initialValue = new Set();
+
+  const result = utils.reduceIterable(true)(set, fn, initialValue);
+
+  t.deepEqual(result, new Set([5, 4, 3, 2, 1]));
+});
+
+test('if reduceIterable will reduce the iterable correctly with no initialValue when reverse', (t) => {
+  const set = new Set([1, 2, 3, 4, 5]);
+  const fn = (total, number) => {
+    if (!(total instanceof Set)) {
+      total = new Set([total]);
+    }
+
+    total.add(number);
+
+    return total;
+  };
+  const initialValue = undefined;
+
+  const result = utils.reduceIterable(true)(set, fn, initialValue);
+
+  t.deepEqual(result, new Set([5, 4, 3, 2, 1]));
 });
 
 test('if reduceObject will reduce the object correctly with an initialValue', (t) => {
@@ -146,7 +198,7 @@ test('if reduceObject will reduce the object correctly with an initialValue', (t
   const fn = (total, number) => total + number;
   const initialValue = 0;
 
-  const result = utils.reduceObject(object, fn, initialValue);
+  const result = utils.reduceObject(false)(object, fn, initialValue);
 
   t.is(result, 15);
 });
@@ -156,36 +208,73 @@ test('if reduceObject will reduce the object correctly with no initialValue', (t
   const fn = (total, number) => total + number;
   const initialValue = undefined;
 
-  const result = utils.reduceObject(object, fn, initialValue);
+  const result = utils.reduceObject(false)(object, fn, initialValue);
 
   t.is(result, 15);
+});
+
+test('if reduceObject will reduce the object correctly with an initialValue when reverse', (t) => {
+  const object = {one: 1, two: 2, three: 3, four: 4, five: 5};
+  const fn = (total, number, key) => {
+    total[key] = number;
+
+    return total;
+  };
+  const initialValue = {};
+
+  const result = utils.reduceObject(true)(object, fn, initialValue);
+
+  t.deepEqual(result, {five: 5, four: 4, three: 3, two: 2, one: 1});
+});
+
+test('if reduceObject will reduce the object correctly with no initialValue when reverse', (t) => {
+  const object = {one: 1, two: 2, three: 3, four: 4, five: 5};
+  const fn = (total, number, key) => {
+    if (total.constructor !== Object) {
+      total = {
+        originalKey: total
+      };
+    }
+
+    total[key] = number;
+
+    return total;
+  };
+  const initialValue = undefined;
+
+  const result = utils.reduceObject(true)(object, fn, initialValue);
+
+  t.deepEqual(result, {originalKey: 5, four: 4, three: 3, two: 2, one: 1});
 });
 
 test('if getReduce returns reduceArray when isCollectionArray is true', (t) => {
   const isCollectionArray = true;
   const isCollectionIterable = false;
+  const isReverse = false;
 
-  const result = utils.getReduce(isCollectionArray, isCollectionIterable);
+  const result = utils.getReduce(isCollectionArray, isCollectionIterable, isReverse);
 
-  t.is(result, utils.reduceArray);
+  t.is(result.toString(), utils.reduceArray(isReverse).toString());
 });
 
 test('if getReduce returns reduceIterable when isCollectionArray is false but isCollectionIterable is true', (t) => {
   const isCollectionArray = false;
   const isCollectionIterable = true;
+  const isReverse = false;
 
-  const result = utils.getReduce(isCollectionArray, isCollectionIterable);
+  const result = utils.getReduce(isCollectionArray, isCollectionIterable, isReverse);
 
-  t.is(result, utils.reduceIterable);
+  t.is(result.toString(), utils.reduceIterable(isReverse).toString());
 });
 
 test('if getReduce returns reduceObject when isCollectionArray is false and isCollectionIterable is false', (t) => {
   const isCollectionArray = false;
   const isCollectionIterable = false;
+  const isReverse = false;
 
-  const result = utils.getReduce(isCollectionArray, isCollectionIterable);
+  const result = utils.getReduce(isCollectionArray, isCollectionIterable, isReverse);
 
-  t.is(result, utils.reduceObject);
+  t.is(result.toString(), utils.reduceObject(isReverse).toString());
 });
 
 test('if addHandler will add to the collection correctly', (t) => {

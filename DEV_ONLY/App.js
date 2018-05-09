@@ -9,14 +9,15 @@ const size = 100000;
 
 const find123 = find((value) => value === 423);
 
+const mapToObject = transduce(map((value) => value));
+
+console.log(mapToObject(['foo', 'bar'], new Map(), {isReverse: true}));
+
 console.log(
   'find value',
-  transduce(
-    find123,
-    new Set(new Array(size).fill(1).map((ignored, index) => index)),
-    null,
-    (ignored, value, key) => key
-  )
+  transduce(find123, new Set(new Array(size).fill(1).map((ignored, index) => index)), null, {
+    passHandler: (ignored, value, key) => key
+  })
 );
 
 const isEvenSquareRoot = combine([
