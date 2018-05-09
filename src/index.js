@@ -54,14 +54,14 @@ export const map = (fn) => (reducing) => (collection, value, key) =>
  */
 export const transduce = (fns, ...rest) => {
   const transform = Array.isArray(fns) ? combineHandlers(fns) : fns;
-  const transducer = (collection, passedInitialValue, passedHandler) => {
+  const transducer = (collection, passedInitialValue, {isReverse, passHandler} = {}) => {
     const isCollectionArray = Array.isArray(collection);
     const isCollectionIterable = !isCollectionArray && isIterable(collection);
     const initialValue = getInitialValue(passedInitialValue, collection, isCollectionArray, isCollectionIterable);
 
-    return getReduce(isCollectionArray, isCollectionIterable)(
+    return getReduce(isCollectionArray, isCollectionIterable, isReverse)(
       collection,
-      transform(getTransformHandler(passedHandler, initialValue)),
+      transform(getTransformHandler(passHandler, initialValue)),
       initialValue
     );
   };

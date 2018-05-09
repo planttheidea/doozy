@@ -186,6 +186,45 @@ test('if transduce will handle a single transformation correctly', (t) => {
   t.deepEqual(setResult, expectedSetResult);
 });
 
+test('if transduce will handle a single transformation correctly in reverse', (t) => {
+  const transform = index.transduce(index.filter((value) => value % 2 === 0));
+
+  const size = 5;
+
+  const array = new Array(size).fill(1).map((ignored, index) => index);
+  const object = array.reduce((wordToNumber, value) => {
+    wordToNumber[toWords(value)] = value;
+
+    return wordToNumber;
+  }, {});
+  const set = new Set(array);
+  const mapFromObject = new Map(utils.getPairs(object));
+
+  const arrayResult = transform(array, undefined, {isReverse: true});
+  const objectResult = transform(object, undefined, {isReverse: true});
+  const mapResult = transform(mapFromObject, undefined, {isReverse: true});
+  const setResult = transform(set, undefined, {isReverse: true});
+
+  t.deepEqual(arrayResult, [4, 2, 0]);
+  t.deepEqual(objectResult, {four: 4, two: 2, zero: 0});
+
+  const expectedMapResult = new Map();
+
+  expectedMapResult.set('four', 4);
+  expectedMapResult.set('two', 2);
+  expectedMapResult.set('zero', 0);
+
+  t.deepEqual(mapResult, expectedMapResult);
+
+  const expectedSetResult = new Set();
+
+  expectedSetResult.add(4);
+  expectedSetResult.add(2);
+  expectedSetResult.add(0);
+
+  t.deepEqual(setResult, expectedSetResult);
+});
+
 test('if transduce will handle multiple transformations correctly', (t) => {
   const transform = index.transduce([
     index.map((value) => ({

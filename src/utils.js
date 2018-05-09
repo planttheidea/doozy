@@ -13,27 +13,39 @@ export const isIterable = (value) =>
   typeof Symbol === 'function' &&
   typeof value[Symbol.iterator] === 'function';
 
-/**
- * @function reduceArray
- *
- * @description
- * reduce the array collection passed to a new single value based on fn
- *
- * @param {Array} collection the collection to reduce
- * @param {function} fn the method to reduce the collection with
- * @param {any} [initialValue] the passed initial value
- * @returns {Array} the reduced collection
- */
-export const reduceArray = (collection, fn, initialValue) => {
-  let index = 0,
-      value = typeof initialValue !== 'undefined' ? initialValue : collection[index++];
+export const reduceArray = (isReverse) =>
+  /**
+   * @function reduceArray
+   *
+   * @description
+   * reduce the array collection passed to a new single value based on fn
+   *
+   * @param {Array} collection the collection to reduce
+   * @param {function} fn the method to reduce the collection with
+   * @param {any} [initialValue] the passed initial value
+   * @returns {Array} the reduced collection
+   */
+  (collection, fn, initialValue) => {
+    let index, value;
 
-  for (; index < collection.length; index++) {
-    value = fn(value, collection[index], index);
-  }
+    if (isReverse) {
+      index = collection.length - 1;
+      value = initialValue !== void 0 ? initialValue : collection[index--];
 
-  return value;
-};
+      for (; index >= 0; index--) {
+        value = fn(value, collection[index], index);
+      }
+    } else {
+      index = 0;
+      value = initialValue !== void 0 ? initialValue : collection[index++];
+
+      for (; index < collection.length; index++) {
+        value = fn(value, collection[index], index);
+      }
+    }
+
+    return value;
+  };
 
 /**
  * @function getPairs
@@ -56,7 +68,7 @@ export const getPairs = (collection, isValuesOnly) => {
     return pairs;
   }
 
-  return reduceArray(
+  return reduceArray(false)(
     Object.keys(collection),
     (pairs, key) => {
       pairs.push(isValuesOnly ? collection[key] : [key, collection[key]]);
@@ -67,59 +79,88 @@ export const getPairs = (collection, isValuesOnly) => {
   );
 };
 
-/**
- * @function reduceIterable
- *
- * @description
- * reduce the iterable collection passed to a new single value based on fn
- *
- * @param {Map|Set} collection the collection to reduce
- * @param {function} fn the method to reduce the collection with
- * @param {any} [initialValue] the passed initial value
- * @returns {Map|Set} the reduced collection
- */
-export const reduceIterable = (collection, fn, initialValue) => {
-  const entries = getPairs(collection);
+export const reduceIterable = (isReverse) =>
+  /**
+   * @function reduceIterable
+   *
+   * @description
+   * reduce the iterable collection passed to a new single value based on fn
+   *
+   * @param {Map|Set} collection the collection to reduce
+   * @param {function} fn the method to reduce the collection with
+   * @param {any} [initialValue] the passed initial value
+   * @returns {Map|Set} the reduced collection
+   */
+  (collection, fn, initialValue) => {
+    const pairs = getPairs(collection);
 
-  let index = 0,
-      value = typeof initialValue !== 'undefined' ? initialValue : entries[index++][1],
-      entry;
+    let index, value, entry;
 
-  for (; index < entries.length; index++) {
-    entry = entries[index];
+    if (isReverse) {
+      index = pairs.length - 1;
+      value = initialValue !== void 0 ? initialValue : pairs[index--][1];
 
-    value = fn(value, entry[1], entry[0]);
-  }
+      for (; index >= 0; index--) {
+        entry = pairs[index];
 
-  return value;
-};
+        value = fn(value, entry[1], entry[0]);
+      }
+    } else {
+      index = 0;
+      value = initialValue !== void 0 ? initialValue : pairs[index++][1];
 
-/**
- * @function reduceObject
- *
- * @description
- * reduce the object collection passed to a new single value based on fn
- *
- * @param {Object} collection the collection to reduce
- * @param {function} fn the method to reduce the collection with
- * @param {any} [initialValue] the passed initial value
- * @returns {Object} the reduced collection
- */
-export const reduceObject = (collection, fn, initialValue) => {
-  const keys = Object.keys(collection);
+      for (; index < pairs.length; index++) {
+        entry = pairs[index];
 
-  let index = 0,
-      value = typeof initialValue !== 'undefined' ? initialValue : collection[keys[index++]];
+        value = fn(value, entry[1], entry[0]);
+      }
+    }
 
-  for (; index < keys.length; index++) {
-    value = fn(value, collection[keys[index]], keys[index]);
-  }
+    return value;
+  };
 
-  return value;
-};
+export const reduceObject = (isReverse) =>
+  /**
+   * @function reduceObject
+   *
+   * @description
+   * reduce the object collection passed to a new single value based on fn
+   *
+   * @param {Object} collection the collection to reduce
+   * @param {function} fn the method to reduce the collection with
+   * @param {any} [initialValue] the passed initial value
+   * @returns {Object} the reduced collection
+   */
+  (collection, fn, initialValue) => {
+    const keys = Object.keys(collection);
 
-export const getReduce = (isCollectionArray, isCollectionIterable) =>
-  isCollectionArray ? reduceArray : isCollectionIterable ? reduceIterable : reduceObject;
+    let index, value;
+
+    if (isReverse) {
+      index = keys.length - 1;
+      value = initialValue !== void 0 ? initialValue : collection[keys[index--]];
+
+      for (; index >= 0; index--) {
+        value = fn(value, collection[keys[index]], keys[index]);
+      }
+    } else {
+      index = 0;
+      value = initialValue !== void 0 ? initialValue : collection[keys[index++]];
+
+      for (; index < keys.length; index++) {
+        value = fn(value, collection[keys[index]], keys[index]);
+      }
+    }
+
+    return value;
+  };
+
+export const getReduce = (isCollectionArray, isCollectionIterable, isReverse) =>
+  isCollectionArray
+    ? reduceArray(isReverse)
+    : isCollectionIterable
+      ? reduceIterable(isReverse)
+      : reduceObject(isReverse);
 
 /**
  * @function addHandler
@@ -164,7 +205,7 @@ export const assignHandler = (collection, value, key) => {
  * @returns {fn} the combined function
  */
 export const combineHandlers = (fns) =>
-  reduceArray(
+  reduceArray(false)(
     fns,
     (f, g) =>
       function() {

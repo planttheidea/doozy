@@ -7,6 +7,7 @@ Transducer library for arrays, objects, sets, and maps
 * [Summary](#summary)
 * [Usage](#usage)
 * [transduce](#transduce)
+  * [Additional parameters](#additional-parameters)
 * [Transformers](#transformers)
   * [filter](#filter)
   * [find](#find)
@@ -19,7 +20,7 @@ Transducer library for arrays, objects, sets, and maps
 
 Transducers are a great way to write efficient, declarative data transformations that only perform operations as needed. [Several great articles have been written on the topic](https://medium.com/@roman01la/understanding-transducers-in-javascript-3500d3bd9624), but applying them can be daunting for the most common object type (`Array`), let alone various object types.
 
-`doozy` is a tiny library (~906 bytes minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
+`doozy` is a tiny library (~1kB minified + gzipped) that attempts to streamline this process, allowing for simple creation of transducers that work with multiple object types.
 
 ## Usage
 
@@ -65,10 +66,20 @@ console.log(transduce(fns, collection)); // [16, 25]
 console.log(transduce(fns)(collection)); // [16, 25]
 ```
 
-There are two additional parameters that can be passed, `initialValue` and `passHandler`.
+#### Additional parameters
+
+There are two additional parameters that can be passed when `transduce` is called with the `collection`:
 
 * `initialValue` is the value that the new transformed collection is built from (it defaults to the same object type as the `collection` passed).
-* `passHandler` is the method used to assign the value to the new collection once it passes all methods in `fns` (it defaults to a simple addition method for the appropriate object type)
+* `options` is an object containing the following available properties:
+  * `isReverse` => is the collection iterated over from back-to-front instead of the standard front-to-back
+  * `passHandler` => the method used to assign the value to the new collection once it passes all methods in `fns` (defaults to a simple addition method for the appropriate object type)
+
+```javascript
+const toMap = transduce(map(value => value));
+
+console.log(toMap(["foo", "bar"], new Map(), { isReverse: true })); // Map(2) {1 => 'bar', 0 => 'foo'}
+```
 
 ## Transformers
 
